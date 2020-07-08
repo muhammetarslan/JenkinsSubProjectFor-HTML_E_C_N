@@ -8,15 +8,13 @@ import org.testng.annotations.Test;
 import utils.ConfigurationReader;
 import utils.DriverFactory;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
 
 import static org.testng.AssertJUnit.*;
 
@@ -78,8 +76,23 @@ public class PokeElement extends BaseTest {
     private void sendEmail(String sendEmailTo, String requestAddress){
         String from= ConfigurationReader.getProperty("email_sender");
         String host=ConfigurationReader.getProperty("host");
-        System.setProperty("mail.smtp.host",host);
-        Session session= Session.getDefaultInstance(System.getProperties());
+        String password=ConfigurationReader.getProperty("email_password");
+        Properties properties = System.getProperties();
+
+        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.socketFactory.port", "465");
+        properties.put("mail.smtp.socketFactory.class",
+                "javax.net.ssl.SSLSocketFactory");
+        properties.put("mail.smtp.auth", "true");
+        properties.put("mail.smtp.port", "805");
+
+        Session session = Session.getDefaultInstance(properties,new javax.mail.Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(from,password);
+            }
+        });
+
         try{
             MimeMessage mimeMessage=new MimeMessage(session);
             mimeMessage.setFrom(new InternetAddress(from));
