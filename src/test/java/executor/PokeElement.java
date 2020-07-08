@@ -80,11 +80,11 @@ public class PokeElement extends BaseTest {
         Properties properties = System.getProperties();
 
         properties.put("mail.smtp.host", "smtp.gmail.com");
-        properties.put("mail.smtp.socketFactory.port", "465");
+        properties.put("mail.smtp.socketFactory.port", ConfigurationReader.getProperty("email_port_on"));
         properties.put("mail.smtp.socketFactory.class",
                 "javax.net.ssl.SSLSocketFactory");
         properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.port", "805");
+        properties.put("mail.smtp.port", ConfigurationReader.getProperty("email_port_out"));
 
         Session session = Session.getDefaultInstance(properties,new javax.mail.Authenticator() {
             @Override
