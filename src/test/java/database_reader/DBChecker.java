@@ -1,7 +1,6 @@
 package database_reader;
 
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 import utils.ConfigurationReader;
 
 import java.sql.*;
@@ -9,14 +8,15 @@ import java.util.*;
 
 public class DBChecker {
 
-    private static final String SELECTALLQUERY="SELECT * FROM request;";
+    private static final String SELECTALLQUERY="SELECT * FROM request ORDER BY request_id;";
     private static final String GETROWCOUNT="SELECT COUNT(*) FROM request;";
     private static final String UPDATEASSCHEDULED="UPDATE request SET is_scheduled = 1 WHERE request_id = %d ;";
+
     public static void main(String[] args) {
         getTheRequests();
     }
 
-    @DataProvider
+    @DataProvider(name="unscheduled-request-data")
     public static Object[][] getTheRequests() {
         try (Connection connection = DriverManager.getConnection(
                 ConfigurationReader.getProperty("url")
@@ -24,7 +24,7 @@ public class DBChecker {
                 , ConfigurationReader.getProperty("password"));
              Statement statement1 = connection.createStatement();
              Statement statement2 = connection.createStatement();
-             Statement statement3=connection.createStatement();
+             Statement statement3=connection.createStatement(); //statement 3 executed in the method for updating the is_scheduled column
              /*
              resultSet1 for row count
              resultSet2 for querying requests
@@ -48,8 +48,8 @@ public class DBChecker {
             int row=0;
             while (resultSet2.next()) {
                     if(resultSet2.getInt("is_scheduled")==0) {  //checking the ones that are not scheduled yet
-                        for (int i = 1; i < columnCount; i++) {
-                            resultArray[row][i] = resultSet2.getString(i);
+                        for (int i = 0; i < columnCount; i++) {
+                            resultArray[row][i] = resultSet2.getString(i+1);
                         }
                         String isScheduledQuery = String.format(UPDATEASSCHEDULED, row + 1); //updating isScheduled after assigning
                         statement3.execute(isScheduledQuery);
@@ -57,7 +57,7 @@ public class DBChecker {
                     row++;
 
             }
-            System.out.println(Arrays.deepToString(resultArray));
+            System.out.println("new data scheduling: \n "+Arrays.deepToString(resultArray));
             return resultArray;
 
         } catch (SQLException exception) {

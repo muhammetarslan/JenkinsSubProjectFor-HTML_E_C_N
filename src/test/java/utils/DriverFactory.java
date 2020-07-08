@@ -75,7 +75,7 @@ public class DriverFactory {
     }
 
     public static void closeDriver(){
-        if(driverPool!=null){
+        if(driverPool!=null&&driverPool.get()!=null){
             driverPool.get().quit();
             driverPool.remove();
         }
