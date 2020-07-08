@@ -1,44 +1,64 @@
 package database_reader;
 
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 import utils.ConfigurationReader;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DBChecker {
 
     private static final String SELECTALLQUERY="SELECT * FROM request;";
+    private static final String GETROWCOUNT="SELECT COUNT(*) FROM request;";
+    private static final String UPDATEASSCHEDULED="UPDATE request SET is_scheduled = 1 WHERE request_id = %d ;";
+    public static void main(String[] args) {
+        getTheRequests();
+    }
 
-
-    public static Map<Integer,List<String>> getTheRequests() {
+    @DataProvider
+    public static Object[][] getTheRequests() {
         try (Connection connection = DriverManager.getConnection(
                 ConfigurationReader.getProperty("url")
                 , ConfigurationReader.getProperty("username")
                 , ConfigurationReader.getProperty("password"));
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(SELECTALLQUERY);
+             Statement statement1 = connection.createStatement();
+             Statement statement2 = connection.createStatement();
+             Statement statement3=connection.createStatement();
+             /*
+             resultSet1 for row count
+             resultSet2 for querying requests
+              */
+             ResultSet resultSet1=statement1.executeQuery(GETROWCOUNT);
+             ResultSet resultSet2 =statement2.executeQuery(SELECTALLQUERY);
         ) {
-            ResultSetMetaData metaData = resultSet.getMetaData();
+            ResultSetMetaData metaData = resultSet2.getMetaData();
             /*
             A loop will initialize the result to resultMap
             Map contains <ID of request,
-                List of: date,dissappear|appear,xPath, email, adress>
+                List of: date,disappear|appear,xPath, email, address>
              */
+
             Map<Integer,List<String>> resultMap=new HashMap<>();
-            int coulumnCount = metaData.getColumnCount();
-            while (resultSet.next()) {
-                List<String> resultList=new ArrayList<>();
-                for (int i = coulumnCount; i>1; i--) {
-                    String result = resultSet.getString(i);
-                    resultList.add(result);
-                }
-                Integer key=Integer.parseInt(resultSet.getString(1));
-                resultMap.put(key,resultList);
+            int columnCount = metaData.getColumnCount();
+            System.out.println("column label: "+metaData.getColumnLabel(6));
+            resultSet1.next();
+            int rowCount=resultSet1.getInt(1);
+            Object[][] resultArray=new Object[rowCount][columnCount];
+            int row=0;
+            while (resultSet2.next()) {
+                    if(resultSet2.getInt("is_scheduled")==0) {  //checking the ones that are not scheduled yet
+                        for (int i = 1; i < columnCount; i++) {
+                            resultArray[row][i] = resultSet2.getString(i);
+                        }
+                        String isScheduledQuery = String.format(UPDATEASSCHEDULED, row + 1); //updating isScheduled after assigning
+                        statement3.execute(isScheduledQuery);
+                    }
+                    row++;
+
             }
-            return resultMap;
+            System.out.println(Arrays.deepToString(resultArray));
+            return resultArray;
 
         } catch (SQLException exception) {
             System.out.println("Jenkins package couldn't connect to the DB");

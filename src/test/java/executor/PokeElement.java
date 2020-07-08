@@ -13,7 +13,6 @@ public class PokeElement extends BaseTest {
     public void poke(){
         Map<Integer, List<String>> resultMap=DBChecker.getTheRequests();
         System.out.println(resultMap);
-        DriverFactory.getDriver().get();
     }
 
     /*
