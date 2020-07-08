@@ -91,7 +91,7 @@ public class PokeElement extends BaseTest {
                             "The address of the element %s" +
                             "It was great to work for you." +
                             "Please reply this email if you have any questions" +
-                            "Your loved robot being, 19ADS40"),requestAddress);
+                            "Your loved robot being, 19ADS40",requestAddress));
             Transport.send(mimeMessage);
             System.out.printf("Message sent successfully to, %s",sendEmailTo);
         } catch (MessagingException mex){
