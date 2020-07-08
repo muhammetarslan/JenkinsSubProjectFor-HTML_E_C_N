@@ -5,8 +5,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
+import utils.ConfigurationReader;
 import utils.DriverFactory;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,6 +45,7 @@ public class PokeElement extends BaseTest {
 
                 if (requestEndDate==null || currentDate.before(requestEndDate)) {
                     WebDriver driver = DriverFactory.getDriver();
+                    System.out.println(request[6]);
                     driver.get(request[6]);
                     Thread.sleep(2000);
                     WebElement element = null;
@@ -52,15 +60,43 @@ public class PokeElement extends BaseTest {
                 Visa-versa for the disappear which is the else part.
                 */
                         if (request[2].equals("appear")) {
-                            assertNull(element);
+                            if(element!=null){
+                                sendEmail(request[4],request[6]);
+                            }
                         } else {
-                            assertNotNull(element);
+                            if(element==null){
+                                sendEmail(request[4],request[6]);
+                            }
                         }
                     }
                 }
             }
 
 
+
+    }
+    private void sendEmail(String sendEmailTo, String requestAddress){
+        String from= ConfigurationReader.getProperty("email_sender");
+        String host=ConfigurationReader.getProperty("host");
+        System.setProperty("mail.smtp.host",host);
+        Session session= Session.getDefaultInstance(System.getProperties());
+        try{
+            MimeMessage mimeMessage=new MimeMessage(session);
+            mimeMessage.setFrom(new InternetAddress(from));
+            mimeMessage.addRecipient(Message.RecipientType.TO,new InternetAddress(sendEmailTo));
+            mimeMessage.setSubject("HTML Element Change Notifier");
+            mimeMessage.setText(String.format(
+                    "Hi I'm a robot," +
+                            "Your requested element has a change. " +
+                            "The address of the element %s" +
+                            "It was great to work for you." +
+                            "Please reply this email if you have any questions" +
+                            "Your loved robot being, 19ADS40"),requestAddress);
+            Transport.send(mimeMessage);
+            System.out.printf("Message sent successfully to, %s",sendEmailTo);
+        } catch (MessagingException mex){
+            mex.printStackTrace();
+        }
 
     }
 

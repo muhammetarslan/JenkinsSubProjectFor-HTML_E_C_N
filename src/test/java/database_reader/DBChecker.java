@@ -46,13 +46,13 @@ public class DBChecker {
             Object[][] resultArray=new Object[rowCount][columnCount];
             int row=0;
             while (resultSet2.next()) {
-                    if(resultSet2.getInt("is_scheduled")==0) {  //checking the ones that are not scheduled yet
+//                    if(resultSet2.getInt("is_scheduled")==0) {  //checking the ones that are not scheduled yet, removed for now
                         for (int i = 0; i < columnCount; i++) {
                             resultArray[row][i] = resultSet2.getString(i+1);
                         }
                         String isScheduledQuery = String.format(UPDATEASSCHEDULED, row + 1); //updating isScheduled after assigning
                         statement3.execute(isScheduledQuery);
-                    }
+//                    }
                     row++;
 
             }
