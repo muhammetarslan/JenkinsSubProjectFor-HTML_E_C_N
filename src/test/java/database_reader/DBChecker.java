@@ -41,7 +41,6 @@ public class DBChecker {
 
             Map<Integer,List<String>> resultMap=new HashMap<>();
             int columnCount = metaData.getColumnCount();
-            System.out.println("column label: "+metaData.getColumnLabel(6));
             resultSet1.next();
             int rowCount=resultSet1.getInt(1);
             Object[][] resultArray=new Object[rowCount][columnCount];

@@ -64,8 +64,4 @@ public class PokeElement extends BaseTest {
 
     }
 
-    /*
-    data provider will be set up
-     */
-
 }
